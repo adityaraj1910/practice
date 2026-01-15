@@ -1,0 +1,57 @@
+pip install fastapi uvicorn scikit-learn joblib pytest
+
+gedit train.py 
+from sklearn.linear_model import LinearRegression
+import joblib
+model LinearRegression()
+X = [[1], [2], [3]]
+y= [2, 4, 6]
+model.fit(X, y)
+joblib.dump (model, "model.pkl")
+
+python3 train.py 
+gedit main.py 
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+import joblib
+app=FastAPI()
+model =joblib.load("model.pkl")
+
+class Input(BaseModel):
+        x: float
+@app.post("/predict")
+def predict (data: Input):
+    return {"prediction": model.predict([[data.x]])[0]}
+
+
+uvicorn main:app --reload 
+(verify using curl)
+curl -X POST <link>/predict -H "Content-type: application/json" -d '{"x":5}'
+
+stop
+
+gedit test_api.py 
+
+from fastapi.testclient import TestClient 
+from main import app 
+client =TestClient (app)
+
+def test_predict():
+    result =client.post ("/predict",json={"x":6})
+    assert result.status_code==200
+
+pytest
+gedit Dockerfile 
+
+FROM python:3.11 
+WORKDIR /app
+COPY . . 
+RUN pip install -r requirements.txt 
+CMD ["uvicorn, "main:app","--host","0.0.0.0","--port","8000"]
+
+pip freeze>requirements.txt 
+docker build -t ml-api .
+docker run -p 8000:8000 ml-api
+
+use curl operation to check (replace link)
