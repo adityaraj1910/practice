@@ -1,0 +1,26 @@
+sudo apt install docker -compose docker io -y
+sudo systemctl start docker 
+gedit app.py 
+6379
+result.incr("count")
+print 
+
+gedit dockerfile 
+from python:3.10 
+run pip install redis 
+Copy app.py . 
+cmd["python","app.py"] 
+
+gedit docker-compose.yml 
+services:
+    app:
+        build:
+        depends_on:[redis]
+    redis:
+        image:redis 
+        volumes:[redis-data:/data] 
+
+volumes:
+    redis-data:
+
+docker-compose up --build
